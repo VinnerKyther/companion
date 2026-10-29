@@ -1,26 +1,22 @@
 import { useState } from 'react'
-import GraphBackground from '../../components/GraphBackground.jsx'
-import '../../styles/app.css'
-import companionLogo from '../../assets/icon_companion.png'
-import googleIcon from '../../assets/google_icon.svg'
-
-const copyrightYear = new Date().getFullYear()
-
-function BrandMark() {
-  return (
-    <img
-      src={companionLogo}
-      className="brand-mark"
-      alt=""
-    />
-  )
-}
+import 'bootstrap-icons/font/bootstrap-icons.css'
+import AuthForm from '../../features/auth/components/AuthForm.jsx'
+import AuthLayout from '../../layouts/auth/AuthLayout.jsx'
+import { Link } from 'react-router'
 
 function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [notice, setNotice] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const canSubmit = username.trim().length > 0 && password.length > 0
+
+  function clearNotice(setValue) {
+    return (value) => {
+      setValue(value)
+      setNotice('')
+    }
+  }
 
   function showPreviewNotice() {
     setNotice('Esta funcionalidade estará disponível em breve.')
@@ -32,83 +28,63 @@ function LoginPage() {
   }
 
   return (
-    <div className="login-page">
-      <GraphBackground />
-      <div className="ambient-glow ambient-glow--orange" aria-hidden="true" />
-      <div className="ambient-glow ambient-glow--orange-secondary" aria-hidden="true" />
-      <div className="graph-veil" aria-hidden="true" />
-
-      <header className="site-header">
-        <div className="site-brand">
-          <BrandMark />
-          <span className="brand-name">COMPANION</span>
-        </div>
-      </header>
-
-      <main className="login-main">
-        <div className="login-column">
-          <section className="login-card" aria-labelledby="login-title">
-            <div className="login-heading">
-              <span className="eyebrow">BEM-VINDO</span>
-              <h1 id="login-title">Entre na sua conta.</h1>
-              <p>Continue tirando suas dúvidas.</p>
-            </div>
-
-            <form className="login-form" onSubmit={handleSubmit} noValidate>
-              <div className="field-group">
-                <label htmlFor="login-username">Usuário</label>
-                <input
-                  id="login-username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
-                  placeholder="usuario@edu.unifor.br"
-                  value={username}
-                  onChange={(event) => { setUsername(event.target.value); setNotice('') }}
-                />
-              </div>
-
-              <div className="field-group">
-                <div className="field-heading">
-                  <label htmlFor="login-password">Senha</label>
-                  <button className="text-button forgot-button" type="button" onClick={showPreviewNotice}>Esqueceu a senha?</button>
-                </div>
-                <div className="password-field">
-                  <input
-                    id="login-password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="********"
-                    value={password}
-                    onChange={(event) => { setPassword(event.target.value); setNotice('') }}
-                  />
-                </div>
-              </div>
-
-              <button className="submit-button" type="submit" disabled={!canSubmit}>Entrar <span aria-hidden="true"></span></button>
-            </form>
-
-            <div className="signup-row">
-              <span>Ainda não possui conta?</span>
-              <button className="text-button" type="button" onClick={showPreviewNotice}>Criar conta</button>
-            </div>
-
-            <div className="divider"><span>ou</span></div>
-
-            <p className="alternate-label">Acessar conta com</p>
-            <button className="google-button" type="button" onClick={showPreviewNotice}>
-              <img src={googleIcon} alt="" width="20" height="20" aria-hidden="true" />
-              <span>Continuar com Google</span>
-            </button>
-
-            {notice && <p className="preview-notice" role="status">{notice}</p>}
-          </section>
-
-          <footer className="login-footer">  Companion &copy; {copyrightYear} Alguns dos direitos reservados. </footer>
-        </div>
-      </main>
-    </div>
+    <AuthLayout>
+      <AuthForm
+        eyebrow="BEM-VINDO"
+        title="Entre na sua conta."
+        description="Continue tirando suas dúvidas."
+        fields={[
+          {
+            id: 'login-username',
+            name: 'username',
+            label: 'Usuário',
+            autoComplete: 'username',
+            placeholder: 'usuario@edu.unifor.br',
+            value: username,
+            onChange: clearNotice(setUsername),
+            trailing: <i className="bi bi-person" aria-hidden="true" />,
+          },
+          {
+            id: 'login-password',
+            name: 'password',
+            label: 'Senha',
+            type: showPassword ? 'text' : 'password',
+            autoComplete: 'current-password',
+            placeholder: '********',
+            value: password,
+            onChange: clearNotice(setPassword),
+            labelAction: (
+              <Link className="text-button forgot-button" to="/recuperar-senha">
+                Esqueceu a senha?
+              </Link>
+            ),
+            trailing: (
+              <button
+                className="password-visibility-button"
+                type="button"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((visible) => !visible)}
+              >
+                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} aria-hidden="true" />
+              </button>
+            ),
+          },
+        ]}
+        submitLabel="Entrar"
+        message={notice}
+        canSubmit={canSubmit}
+        onSubmit={handleSubmit}
+        footer={(
+          <div className="signup-row">
+            <span>Ainda não possui conta?</span>
+            <Link className="text-button" to="/criar-conta">
+              Criar conta
+            </Link>
+          </div>
+        )}
+      />
+    </AuthLayout>
   )
 }
 
